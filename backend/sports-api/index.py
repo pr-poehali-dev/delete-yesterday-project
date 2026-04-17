@@ -1,234 +1,136 @@
-import os
 import json
 import urllib.request
 import urllib.error
 from datetime import datetime, timedelta
 
-API_KEY = os.environ.get('API_SPORTS_KEY', '')
-BASE_HEADERS = {
-    'x-apisports-key': API_KEY,
-    'Content-Type': 'application/json',
-}
+# TheSportsDB — бесплатный публичный API, ключ не нужен
+BASE_URL = 'https://www.thesportsdb.com/api/v1/json/3'
 
-# Russian league IDs
-LEAGUE_IDS = {
-    'football': 235,      # Russian Premier League
-    'hockey': 57,         # KHL
-    'basketball': 270,    # VTB United League
-    'volleyball': 24,     # Russian Superliga (Volleyball)
-}
+# Russian league IDs in TheSportsDB
+LEAGUES = [
+    {'id': '4355', 'sport': 'football',   'name': 'РПЛ'},
+    {'id': '4920', 'sport': 'hockey',     'name': 'КХЛ'},
+    {'id': '4476', 'sport': 'basketball', 'name': 'Единая Лига ВТБ'},
+    {'id': '4545', 'sport': 'volleyball', 'name': 'Суперлига'},
+]
 
-LEAGUE_NAMES = {
-    235: 'РПЛ',
-    57: 'КХЛ',
-    270: 'Единая Лига ВТБ',
-    24: 'Суперлига',
-}
+LEAGUE_BY_ID = {l['id']: l for l in LEAGUES}
 
-SPORT_ENDPOINTS = {
-    'football': 'https://v3.football.api-sports.io',
-    'hockey': 'https://v1.hockey.api-sports.io',
-    'basketball': 'https://v1.basketball.api-sports.io',
-    'volleyball': 'https://v1.volleyball.api-sports.io',
+SPORT_EMOJIS = {
+    'football': '⚽',
+    'hockey': '🏒',
+    'basketball': '🏀',
+    'volleyball': '🏐',
 }
 
 
-def api_request(sport: str, path: str) -> dict:
-    url = f"{SPORT_ENDPOINTS[sport]}{path}"
-    req = urllib.request.Request(url, headers=BASE_HEADERS)
+def api_get(path: str) -> dict:
+    url = f"{BASE_URL}{path}"
+    req = urllib.request.Request(url, headers={'User-Agent': 'SportLiveApp/1.0'})
     try:
         with urllib.request.urlopen(req, timeout=10) as resp:
             return json.loads(resp.read().decode())
     except urllib.error.HTTPError as e:
-        return {'error': str(e), 'status': e.code}
+        return {'error': f'HTTP {e.code}'}
     except Exception as e:
         return {'error': str(e)}
 
 
-def normalize_match(sport: str, raw: dict) -> dict:
-    """Normalize match data to unified format"""
-    if sport == 'football':
-        fixture = raw.get('fixture', {})
-        teams = raw.get('teams', {})
-        goals = raw.get('goals', {})
-        status = fixture.get('status', {})
-        elapsed = status.get('elapsed')
-        short = status.get('short', '')
-        if short in ('1H', '2H', 'HT', 'ET', 'BT', 'P'):
-            match_status = 'live'
-        elif short in ('FT', 'AET', 'PEN'):
-            match_status = 'finished'
-        else:
-            match_status = 'upcoming'
-        return {
-            'id': str(fixture.get('id', '')),
-            'sport': 'football',
-            'league': LEAGUE_NAMES.get(raw.get('league', {}).get('id'), 'РПЛ'),
-            'venue': fixture.get('venue', {}).get('name', ''),
-            'homeTeam': {
-                'id': str(teams.get('home', {}).get('id', '')),
-                'name': teams.get('home', {}).get('name', ''),
-                'logo': teams.get('home', {}).get('logo', ''),
-            },
-            'awayTeam': {
-                'id': str(teams.get('away', {}).get('id', '')),
-                'name': teams.get('away', {}).get('name', ''),
-                'logo': teams.get('away', {}).get('logo', ''),
-            },
-            'homeScore': goals.get('home') or 0,
-            'awayScore': goals.get('away') or 0,
-            'status': match_status,
-            'minute': elapsed,
-            'date': fixture.get('date', '')[:10],
-            'time': fixture.get('date', '')[11:16] if fixture.get('date') else '',
-        }
-    elif sport == 'hockey':
-        game = raw.get('game', raw)
-        teams = raw.get('teams', {})
-        scores = raw.get('scores', {})
-        status = raw.get('status', {})
-        short = status.get('short', '') if isinstance(status, dict) else str(status)
-        if short in ('LIVE', 'HT', 'OT', 'SO'):
-            match_status = 'live'
-        elif short in ('FT', 'AOT', 'APN'):
-            match_status = 'finished'
-        else:
-            match_status = 'upcoming'
-        return {
-            'id': str(raw.get('id', '')),
-            'sport': 'hockey',
-            'league': LEAGUE_NAMES.get(raw.get('league', {}).get('id'), 'КХЛ'),
-            'venue': raw.get('arena', {}).get('name', '') if isinstance(raw.get('arena'), dict) else '',
-            'homeTeam': {
-                'id': str(teams.get('home', {}).get('id', '')),
-                'name': teams.get('home', {}).get('name', ''),
-                'logo': teams.get('home', {}).get('logo', ''),
-            },
-            'awayTeam': {
-                'id': str(teams.get('away', {}).get('id', '')),
-                'name': teams.get('away', {}).get('name', ''),
-                'logo': teams.get('away', {}).get('logo', ''),
-            },
-            'homeScore': scores.get('home') or 0,
-            'awayScore': scores.get('away') or 0,
-            'status': match_status,
-            'period': status.get('long', '') if isinstance(status, dict) else '',
-            'date': raw.get('date', '')[:10] if raw.get('date') else '',
-            'time': raw.get('time', '') or (raw.get('date', '')[11:16] if raw.get('date') else ''),
-        }
-    elif sport == 'basketball':
-        game = raw
-        teams = game.get('teams', {})
-        scores = game.get('scores', {})
-        status = game.get('status', {})
-        short = status.get('short', '') if isinstance(status, dict) else ''
-        if short in ('LIVE', 'HT', 'OT'):
-            match_status = 'live'
-        elif short in ('FT', 'AOT'):
-            match_status = 'finished'
-        else:
-            match_status = 'upcoming'
-        home_score = scores.get('home', {})
-        away_score = scores.get('away', {})
-        return {
-            'id': str(game.get('id', '')),
-            'sport': 'basketball',
-            'league': LEAGUE_NAMES.get(game.get('league', {}).get('id'), 'Единая Лига ВТБ'),
-            'venue': game.get('arena', '') or '',
-            'homeTeam': {
-                'id': str(teams.get('home', {}).get('id', '')),
-                'name': teams.get('home', {}).get('name', ''),
-                'logo': teams.get('home', {}).get('logo', ''),
-            },
-            'awayTeam': {
-                'id': str(teams.get('away', {}).get('id', '')),
-                'name': teams.get('away', {}).get('name', ''),
-                'logo': teams.get('away', {}).get('logo', ''),
-            },
-            'homeScore': home_score.get('total') or 0,
-            'awayScore': away_score.get('total') or 0,
-            'status': match_status,
-            'period': status.get('long', '') if isinstance(status, dict) else '',
-            'date': game.get('date', '')[:10] if game.get('date') else '',
-            'time': game.get('time', '') or (game.get('date', '')[11:16] if game.get('date') else ''),
-        }
-    elif sport == 'volleyball':
-        game = raw
-        teams = game.get('teams', {})
-        scores = game.get('scores', {})
-        status = game.get('status', {})
-        short = status.get('short', '') if isinstance(status, dict) else ''
-        if short in ('LIVE', 'HT'):
-            match_status = 'live'
-        elif short in ('FT',):
-            match_status = 'finished'
-        else:
-            match_status = 'upcoming'
-        return {
-            'id': str(game.get('id', '')),
-            'sport': 'volleyball',
-            'league': LEAGUE_NAMES.get(game.get('league', {}).get('id'), 'Суперлига'),
-            'venue': game.get('arena', '') or '',
-            'homeTeam': {
-                'id': str(teams.get('home', {}).get('id', '')),
-                'name': teams.get('home', {}).get('name', ''),
-                'logo': teams.get('home', {}).get('logo', ''),
-            },
-            'awayTeam': {
-                'id': str(teams.get('away', {}).get('id', '')),
-                'name': teams.get('away', {}).get('name', ''),
-                'logo': teams.get('away', {}).get('logo', ''),
-            },
-            'homeScore': scores.get('home') or 0,
-            'awayScore': scores.get('away') or 0,
-            'status': match_status,
-            'period': status.get('long', '') if isinstance(status, dict) else '',
-            'date': game.get('date', '')[:10] if game.get('date') else '',
-            'time': game.get('time', '') or '',
-        }
-    return raw
+def normalize_event(raw: dict, league: dict) -> dict:
+    """Convert TheSportsDB event to unified match format"""
+    # Date & time
+    date_str = raw.get('dateEvent', '')
+    time_str = raw.get('strTime', '') or ''
+    if time_str and len(time_str) >= 5:
+        time_str = time_str[:5]
 
+    # Scores
+    home_score_raw = raw.get('intHomeScore')
+    away_score_raw = raw.get('intAwayScore')
+    home_score = int(home_score_raw) if home_score_raw not in (None, '', 'null') else 0
+    away_score = int(away_score_raw) if away_score_raw not in (None, '', 'null') else 0
 
-def get_matches_for_sport(sport: str, date_str: str) -> list:
-    league_id = LEAGUE_IDS[sport]
-    season = datetime.now().year
+    # Status
+    status_raw = raw.get('strStatus', '') or ''
+    progress = raw.get('strProgress', '') or ''
 
-    if sport == 'football':
-        path = f"/fixtures?league={league_id}&season={season}&date={date_str}"
-    elif sport == 'hockey':
-        path = f"/games?league={league_id}&season={season}&date={date_str}"
-    elif sport == 'basketball':
-        path = f"/games?league={league_id}&season={season}-{season+1}&date={date_str}"
-    elif sport == 'volleyball':
-        path = f"/games?league={league_id}&season={season}-{season+1}&date={date_str}"
+    if status_raw.lower() in ('live', 'in progress', '1h', '2h', 'ht', 'et', 'pen', 'progress'):
+        status = 'live'
+    elif home_score_raw not in (None, '', 'null') and status_raw.lower() not in ('', 'ns', 'not started'):
+        status = 'finished'
+    elif status_raw.lower() in ('ft', 'aet', 'pen', 'finished', 'complete'):
+        status = 'finished'
     else:
-        return []
+        status = 'upcoming'
 
-    data = api_request(sport, path)
-    response = data.get('response', [])
-    return [normalize_match(sport, m) for m in response]
+    # Format display date: YYYY-MM-DD → DD.MM.YYYY
+    display_date = date_str
+    if date_str and len(date_str) == 10:
+        parts = date_str.split('-')
+        if len(parts) == 3:
+            display_date = f"{parts[2]}.{parts[1]}.{parts[0]}"
+
+    home_logo = raw.get('strHomeTeamBadge', '') or ''
+    away_logo = raw.get('strAwayTeamBadge', '') or ''
+
+    return {
+        'id': str(raw.get('idEvent', '')),
+        'sport': league['sport'],
+        'league': league['name'],
+        'venue': raw.get('strVenue', '') or '',
+        'homeTeam': {
+            'id': str(raw.get('idHomeTeam', '')),
+            'name': raw.get('strHomeTeam', ''),
+            'logo': home_logo,
+        },
+        'awayTeam': {
+            'id': str(raw.get('idAwayTeam', '')),
+            'name': raw.get('strAwayTeam', ''),
+            'logo': away_logo,
+        },
+        'homeScore': home_score,
+        'awayScore': away_score,
+        'status': status,
+        'minute': progress if progress else None,
+        'period': progress if progress else None,
+        'date': display_date,
+        'rawDate': date_str,
+        'time': time_str,
+    }
 
 
-def get_live_matches() -> list:
-    """Get all live matches across all sports"""
+def get_past_events(league: dict, days_back: int = 7) -> list:
+    """Fetch last N days of results for a league"""
+    data = api_get(f"/eventspastleague.php?id={league['id']}")
+    events = data.get('events') or []
+    cutoff = (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
     result = []
-    for sport in LEAGUE_IDS:
-        league_id = LEAGUE_IDS[sport]
-        if sport == 'football':
-            path = f"/fixtures?live=all&league={league_id}"
-        else:
-            path = f"/games?live=all&league={league_id}"
-        data = api_request(sport, path)
-        response = data.get('response', [])
-        result.extend([normalize_match(sport, m) for m in response])
+    for e in events:
+        date = e.get('dateEvent', '')
+        if date >= cutoff:
+            result.append(normalize_event(e, league))
     return result
+
+
+def get_next_events(league: dict) -> list:
+    """Fetch upcoming events for a league"""
+    data = api_get(f"/eventsnextleague.php?id={league['id']}")
+    events = data.get('events') or []
+    return [normalize_event(e, league) for e in events]
+
+
+def get_live_events(league: dict) -> list:
+    """Try to fetch live events (requires Patreon key for real livescore)"""
+    data = api_get(f"/eventslive.php?l={league['id']}")
+    events = data.get('events') or data.get('livescore') or []
+    return [normalize_event(e, league) for e in events if e]
 
 
 def handler(event: dict, context) -> dict:
     """
-    Получение матчей российских чемпионатов из API-Sports.
-    Поддерживает: live, upcoming (расписание), finished (история).
-    Query params: type (live|upcoming|finished|all), sport (football|hockey|basketball|volleyball|all), date
+    Получение матчей российских чемпионатов через TheSportsDB.
+    РПЛ, КХЛ, Единая Лига ВТБ, Суперлига.
+    Query: type (live|upcoming|finished|all), sport (football|hockey|basketball|volleyball|all)
     """
     if event.get('httpMethod') == 'OPTIONS':
         return {
@@ -242,58 +144,68 @@ def handler(event: dict, context) -> dict:
             'body': ''
         }
 
-    if not API_KEY:
-        return {
-            'statusCode': 503,
-            'headers': {'Access-Control-Allow-Origin': '*'},
-            'body': json.dumps({'error': 'API_SPORTS_KEY не настроен', 'matches': []})
-        }
-
     params = event.get('queryStringParameters') or {}
     match_type = params.get('type', 'all')
     sport_filter = params.get('sport', 'all')
 
-    today = datetime.now()
-    sports_to_fetch = list(LEAGUE_IDS.keys()) if sport_filter == 'all' else [sport_filter]
+    leagues = LEAGUES if sport_filter == 'all' else [l for l in LEAGUES if l['sport'] == sport_filter]
 
     try:
+        matches = []
+
         if match_type == 'live':
-            matches = get_live_matches()
-            if sport_filter != 'all':
-                matches = [m for m in matches if m['sport'] == sport_filter]
+            for league in leagues:
+                matches.extend(get_live_events(league))
+            # fallback: today's matches from past if live is empty
+            if not matches:
+                today = datetime.now().strftime('%Y-%m-%d')
+                for league in leagues:
+                    past = get_past_events(league, days_back=1)
+                    matches.extend([m for m in past if m['rawDate'] == today])
 
         elif match_type == 'upcoming':
-            matches = []
-            for d in range(1, 8):
-                date_str = (today + timedelta(days=d)).strftime('%Y-%m-%d')
-                for sport in sports_to_fetch:
-                    day_matches = get_matches_for_sport(sport, date_str)
-                    matches.extend([m for m in day_matches if m['status'] == 'upcoming'])
+            for league in leagues:
+                matches.extend(get_next_events(league))
 
         elif match_type == 'finished':
-            matches = []
-            for d in range(0, 7):
-                date_str = (today - timedelta(days=d)).strftime('%Y-%m-%d')
-                for sport in sports_to_fetch:
-                    day_matches = get_matches_for_sport(sport, date_str)
-                    matches.extend([m for m in day_matches if m['status'] == 'finished'])
+            for league in leagues:
+                matches.extend(get_past_events(league, days_back=14))
 
-        else:  # all — today
-            matches = []
-            date_str = today.strftime('%Y-%m-%d')
-            for sport in sports_to_fetch:
-                matches.extend(get_matches_for_sport(sport, date_str))
-            # add live from all sports
-            live = get_live_matches()
-            live_ids = {m['id'] for m in matches}
-            for m in live:
-                if m['id'] not in live_ids:
-                    matches.append(m)
+        else:  # all
+            for league in leagues:
+                past = get_past_events(league, days_back=3)
+                upcoming = get_next_events(league)
+                live = get_live_events(league)
+                live_ids = {m['id'] for m in live}
+                all_ids = {m['id'] for m in past + upcoming}
+                matches.extend(live)
+                matches.extend(past)
+                for m in upcoming:
+                    if m['id'] not in all_ids:
+                        matches.append(m)
+                for m in live:
+                    if m['id'] not in {x['id'] for x in past + upcoming}:
+                        matches.append(m)
+
+        # deduplicate by id
+        seen = set()
+        unique = []
+        for m in matches:
+            if m['id'] not in seen:
+                seen.add(m['id'])
+                unique.append(m)
+
+        # sort: live first, then upcoming by date, then finished
+        order = {'live': 0, 'upcoming': 1, 'finished': 2}
+        unique.sort(key=lambda m: (order.get(m['status'], 1), m.get('rawDate', '')))
 
         return {
             'statusCode': 200,
-            'headers': {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'},
-            'body': json.dumps({'matches': matches, 'total': len(matches)})
+            'headers': {
+                'Access-Control-Allow-Origin': '*',
+                'Content-Type': 'application/json',
+            },
+            'body': json.dumps({'matches': unique, 'total': len(unique), 'source': 'thesportsdb'})
         }
 
     except Exception as e:

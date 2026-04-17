@@ -3,11 +3,12 @@ import { Match, SportType, LIVE_MATCHES, UPCOMING_MATCHES, FINISHED_MATCHES } fr
 
 const API_URL = 'https://functions.poehali.dev/6f1d15be-b247-4e59-a9b1-281f24dcb669';
 
-// Fallback: convert API response match to our Match format
+const SPORT_EMOJIS: Record<string, string> = {
+  football: '⚽', hockey: '🏒', basketball: '🏀', volleyball: '🏐'
+};
+
+// Convert TheSportsDB normalized match to our frontend Match format
 function apiMatchToMatch(m: ApiMatch): Match {
-  const sportEmojis: Record<string, string> = {
-    football: '⚽', hockey: '🏒', basketball: '🏀', volleyball: '🏐'
-  };
   return {
     id: m.id,
     sport: m.sport as SportType,
@@ -17,7 +18,7 @@ function apiMatchToMatch(m: ApiMatch): Match {
       id: m.homeTeam.id,
       name: m.homeTeam.name,
       shortName: m.homeTeam.name.slice(0, 3).toUpperCase(),
-      emoji: sportEmojis[m.sport] || '🏆',
+      emoji: SPORT_EMOJIS[m.sport] || '🏆',
       sport: m.sport as SportType,
       city: '',
       wins: 0,
@@ -27,7 +28,7 @@ function apiMatchToMatch(m: ApiMatch): Match {
       id: m.awayTeam.id,
       name: m.awayTeam.name,
       shortName: m.awayTeam.name.slice(0, 3).toUpperCase(),
-      emoji: sportEmojis[m.sport] || '🏆',
+      emoji: SPORT_EMOJIS[m.sport] || '🏆',
       sport: m.sport as SportType,
       city: '',
       wins: 0,
@@ -38,31 +39,11 @@ function apiMatchToMatch(m: ApiMatch): Match {
     status: m.status as 'live' | 'upcoming' | 'finished',
     minute: m.minute ?? undefined,
     period: m.period ?? undefined,
-    date: formatDate(m.date),
-    time: formatTime(m.time),
+    // Backend already formats date as DD.MM.YYYY
+    date: m.date || '',
+    time: m.time || '',
     events: [],
   };
-}
-
-function formatDate(date: string): string {
-  if (!date) return '';
-  try {
-    const d = new Date(date);
-    return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-  } catch {
-    return date;
-  }
-}
-
-function formatTime(time: string): string {
-  if (!time) return '';
-  if (time.length === 5 && time.includes(':')) return time;
-  try {
-    const d = new Date(time);
-    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
-  } catch {
-    return time;
-  }
 }
 
 interface ApiMatch {

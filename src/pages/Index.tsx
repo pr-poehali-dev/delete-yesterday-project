@@ -120,9 +120,9 @@ export default function Index() {
         </div>
         {usingFallback && !loading && (
           <div className="max-w-lg mx-auto px-4 pb-2">
-            <div className="flex items-center gap-2 text-xs text-amber-400/80 bg-amber-400/5 border border-amber-400/20 rounded-lg px-3 py-1.5">
-              <Icon name="AlertCircle" size={12} />
-              <span>Демо-данные · Добавь ключ API_SPORTS_KEY для реальных результатов</span>
+            <div className="flex items-center gap-2 text-xs text-muted-foreground/70 bg-white/3 border border-border/50 rounded-lg px-3 py-1.5">
+              <Icon name="Info" size={12} />
+              <span>Демо-данные · Матчи в российских лигах сейчас не транслируются</span>
             </div>
           </div>
         )}
