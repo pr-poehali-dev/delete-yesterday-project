@@ -3,10 +3,8 @@ import Icon from '@/components/ui/icon';
 import MatchCard from '@/components/MatchCard';
 import MatchDetail from '@/components/MatchDetail';
 import NotificationBell from '@/components/NotificationBell';
+import { useSportsData } from '@/hooks/useSportsData';
 import {
-  LIVE_MATCHES,
-  UPCOMING_MATCHES,
-  FINISHED_MATCHES,
   ALL_TEAMS,
   SPORT_CONFIG,
   Match,
@@ -47,22 +45,13 @@ export default function Index() {
   const [selectedMatch, setSelectedMatch] = useState<Match | null>(null);
   const [favTeamIds, setFavTeamIds] = useState<string[]>(loadFavTeams);
   const [notifTeamIds, setNotifTeamIds] = useState<string[]>(loadFavTeams);
-  const [liveScores, setLiveScores] = useState(LIVE_MATCHES);
   const [mounted, setMounted] = useState(false);
+
+  const { liveMatches, upcomingMatches, finishedMatches, loading, error, usingFallback, refresh } = useSportsData();
+  const liveScores = liveMatches;
 
   useEffect(() => {
     setMounted(true);
-    const interval = setInterval(() => {
-      setLiveScores(prev => prev.map(m => {
-        if (m.status === 'live' && Math.random() > 0.85) {
-          const side = Math.random() > 0.5 ? 'homeScore' : 'awayScore';
-          return { ...m, [side]: m[side] + 1, minute: m.minute ? Math.min(m.minute + 1, 90) : m.minute };
-        }
-        if (m.minute) return { ...m, minute: Math.min(m.minute + 1, 90) };
-        return m;
-      }));
-    }, 8000);
-    return () => clearInterval(interval);
   }, []);
 
   const toggleFav = (teamId: string) => {
@@ -83,8 +72,8 @@ export default function Index() {
   const favTeams = ALL_TEAMS.filter(t => favTeamIds.includes(t.id));
   const favMatches = [
     ...liveScores.filter(m => favTeamIds.includes(m.homeTeam.id) || favTeamIds.includes(m.awayTeam.id)),
-    ...UPCOMING_MATCHES.filter(m => favTeamIds.includes(m.homeTeam.id) || favTeamIds.includes(m.awayTeam.id)),
-    ...FINISHED_MATCHES.filter(m => favTeamIds.includes(m.homeTeam.id) || favTeamIds.includes(m.awayTeam.id)),
+    ...upcomingMatches.filter(m => favTeamIds.includes(m.homeTeam.id) || favTeamIds.includes(m.awayTeam.id)),
+    ...finishedMatches.filter(m => favTeamIds.includes(m.homeTeam.id) || favTeamIds.includes(m.awayTeam.id)),
   ];
 
   if (selectedMatch) {
@@ -108,16 +97,35 @@ export default function Index() {
             <span className="text-foreground">LIVE</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg glass">
-              <div className="relative">
-                <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-live-pulse" />
-                <div className="absolute inset-0 w-1.5 h-1.5 rounded-full bg-red-500 animate-ping-slow" />
+            {loading && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg glass">
+                <div className="w-3 h-3 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                <span className="text-xs text-muted-foreground">Загрузка...</span>
               </div>
-              <span className="text-xs font-bold text-red-400">{liveScores.length} ЛАЙВ</span>
-            </div>
+            )}
+            {!loading && (
+              <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg glass">
+                <div className="relative">
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-500 animate-live-pulse" />
+                  <div className="absolute inset-0 w-1.5 h-1.5 rounded-full bg-red-500 animate-ping-slow" />
+                </div>
+                <span className="text-xs font-bold text-red-400">{liveScores.length} ЛАЙВ</span>
+              </div>
+            )}
+            <button onClick={refresh} className="w-8 h-8 glass rounded-lg flex items-center justify-center hover:bg-white/10 transition-colors" title="Обновить">
+              <Icon name="RefreshCw" size={14} className="text-muted-foreground" />
+            </button>
             <NotificationBell />
           </div>
         </div>
+        {usingFallback && !loading && (
+          <div className="max-w-lg mx-auto px-4 pb-2">
+            <div className="flex items-center gap-2 text-xs text-amber-400/80 bg-amber-400/5 border border-amber-400/20 rounded-lg px-3 py-1.5">
+              <Icon name="AlertCircle" size={12} />
+              <span>Демо-данные · Добавь ключ API_SPORTS_KEY для реальных результатов</span>
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Content */}
@@ -159,7 +167,7 @@ export default function Index() {
             <div>
               <h2 className="font-display text-xl text-muted-foreground mb-3">БЛИЖАЙШИЕ МАТЧИ</h2>
               <div className="space-y-3">
-                {filterBySport(UPCOMING_MATCHES).slice(0, 4).map((match, i) => (
+                {filterBySport(upcomingMatches).slice(0, 4).map((match, i) => (
                   <div key={match.id} className={`animate-slide-up stagger-${Math.min(i + 1, 6)}`}>
                     <MatchCard match={match} onClick={() => setSelectedMatch(match)} />
                   </div>
@@ -265,7 +273,7 @@ export default function Index() {
             </div>
 
             {(() => {
-              const filtered = filterBySport(UPCOMING_MATCHES);
+              const filtered = filterBySport(upcomingMatches);
               const byDate: Record<string, Match[]> = {};
               filtered.forEach(m => {
                 if (!byDate[m.date]) byDate[m.date] = [];
@@ -319,14 +327,14 @@ export default function Index() {
             </div>
 
             <div className="space-y-3">
-              {filterBySport(FINISHED_MATCHES).map((match, i) => (
+              {filterBySport(finishedMatches).map((match, i) => (
                 <div key={match.id} className={`animate-slide-up stagger-${Math.min(i + 1, 6)}`}>
                   <MatchCard match={match} onClick={() => setSelectedMatch(match)} />
                 </div>
               ))}
             </div>
 
-            {filterBySport(FINISHED_MATCHES).length === 0 && (
+            {filterBySport(finishedMatches).length === 0 && (
               <div className="glass rounded-2xl p-8 text-center text-muted-foreground">
                 <div className="text-4xl mb-3">🏆</div>
                 <p className="font-medium">Нет завершённых матчей</p>
