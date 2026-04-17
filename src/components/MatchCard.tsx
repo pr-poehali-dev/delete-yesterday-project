@@ -1,4 +1,5 @@
 import { Match, SPORT_CONFIG } from '@/data/sportsData';
+import TeamLogo from '@/components/TeamLogo';
 
 interface MatchCardProps {
   match: Match;
@@ -39,14 +40,24 @@ export default function MatchCard({ match, onClick, compact = false }: MatchCard
 
       <div className="flex items-center justify-between gap-4">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-lg">{match.homeTeam.emoji}</span>
+          <div className="flex items-center gap-2.5 mb-2">
+            <TeamLogo
+              logo={match.homeTeam.logo}
+              emoji={match.homeTeam.emoji}
+              name={match.homeTeam.name}
+              size={compact ? 'sm' : 'md'}
+            />
             <span className={`font-semibold truncate ${compact ? 'text-sm' : 'text-base'}`}>
               {compact ? match.homeTeam.shortName : match.homeTeam.name}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-lg">{match.awayTeam.emoji}</span>
+          <div className="flex items-center gap-2.5">
+            <TeamLogo
+              logo={match.awayTeam.logo}
+              emoji={match.awayTeam.emoji}
+              name={match.awayTeam.name}
+              size={compact ? 'sm' : 'md'}
+            />
             <span className={`font-semibold truncate ${compact ? 'text-sm' : 'text-base'} text-muted-foreground`}>
               {compact ? match.awayTeam.shortName : match.awayTeam.name}
             </span>

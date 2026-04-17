@@ -6,6 +6,7 @@ export interface Team {
   name: string;
   shortName: string;
   emoji: string;
+  logo?: string;
   sport: SportType;
   city: string;
   wins: number;
