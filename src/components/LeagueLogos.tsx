@@ -1,21 +1,23 @@
 import { useState } from 'react';
-import { SportType, SPORT_CONFIG } from '@/data/sportsData';
+import { SportType, SPORT_CONFIG, SPORT_LEAGUES } from '@/data/sportsData';
 
 interface LogoProps {
   size?: number;
   className?: string;
 }
 
-// Универсальный компонент логотипа лиги — грузит из нашего CDN, fallback на emoji
+// Логотип основной лиги по виду спорта (первая топ-лига)
 export function SportLeagueLogo({ sport, size = 32, className = '' }: { sport: SportType; size?: number; className?: string }) {
   const [err, setErr] = useState(false);
   const cfg = SPORT_CONFIG[sport];
+  const topLeague = SPORT_LEAGUES[sport].find(l => l.tier === 'top');
+  const logo = topLeague?.logo;
 
-  if (!err) {
+  if (logo && !err) {
     return (
       <img
-        src={cfg.leagueLogo}
-        alt={cfg.leagueName}
+        src={logo}
+        alt={topLeague?.shortName ?? sport}
         width={size}
         height={size}
         className={`object-contain flex-shrink-0 ${className}`}
@@ -23,10 +25,9 @@ export function SportLeagueLogo({ sport, size = 32, className = '' }: { sport: S
       />
     );
   }
-  return <span style={{ fontSize: size * 0.6 }} className={`flex-shrink-0 leading-none ${className}`}>{cfg.emoji}</span>;
+  return <span style={{ fontSize: size * 0.7 }} className={`flex-shrink-0 leading-none ${className}`}>{cfg.emoji}</span>;
 }
 
-// Иконка «Все виды спорта»
 export function LogoAllSports({ size = 32, className = '' }: LogoProps) {
   return (
     <span style={{ fontSize: size * 0.85 }} className={`flex-shrink-0 leading-none ${className}`}>🏆</span>

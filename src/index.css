@@ -4,242 +4,177 @@
 
 @layer base {
   :root {
-    --background: 220 20% 7%;
-    --foreground: 0 0% 95%;
-
-    --card: 220 18% 10%;
-    --card-foreground: 0 0% 95%;
-
-    --popover: 220 18% 10%;
-    --popover-foreground: 0 0% 95%;
-
-    --primary: 142 76% 48%;
-    --primary-foreground: 220 20% 7%;
-
-    --secondary: 220 18% 14%;
-    --secondary-foreground: 0 0% 85%;
-
-    --muted: 220 18% 14%;
-    --muted-foreground: 220 10% 55%;
-
-    --accent: 27 100% 55%;
-    --accent-foreground: 220 20% 7%;
-
-    --destructive: 0 84% 60%;
+    --background: 222 20% 8%;
+    --foreground: 0 0% 93%;
+    --card: 222 18% 11%;
+    --card-foreground: 0 0% 93%;
+    --popover: 222 18% 11%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 47 96% 53%;
+    --primary-foreground: 222 20% 8%;
+    --secondary: 222 16% 16%;
+    --secondary-foreground: 0 0% 80%;
+    --muted: 222 16% 15%;
+    --muted-foreground: 220 8% 52%;
+    --accent: 142 60% 45%;
+    --accent-foreground: 222 20% 8%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-
-    --border: 220 15% 16%;
-    --input: 220 15% 16%;
-    --ring: 142 76% 48%;
-
-    --radius: 0.75rem;
-
-    /* Sport colors */
-    --sport-football: 142 76% 48%;
-    --sport-hockey: 210 100% 56%;
-    --sport-basketball: 27 100% 55%;
-    --sport-volleyball: 280 80% 65%;
-
-    --live-pulse: 0 84% 60%;
-    --neon-green: 142 76% 48%;
-    --neon-orange: 27 100% 55%;
+    --border: 222 14% 18%;
+    --input: 222 14% 18%;
+    --ring: 47 96% 53%;
+    --radius: 0.5rem;
+    --live: 0 72% 51%;
+    --sport-football: 142 60% 45%;
+    --sport-hockey: 210 90% 54%;
+    --sport-basketball: 27 95% 53%;
+    --sport-volleyball: 271 76% 63%;
+    --sidebar-background: 222 20% 8%;
+    --sidebar-foreground: 0 0% 93%;
+    --sidebar-primary: 47 96% 53%;
+    --sidebar-primary-foreground: 222 20% 8%;
+    --sidebar-accent: 222 16% 16%;
+    --sidebar-accent-foreground: 0 0% 80%;
+    --sidebar-border: 222 14% 18%;
+    --sidebar-ring: 47 96% 53%;
   }
 }
 
 @layer base {
   * {
     @apply border-border;
+    box-sizing: border-box;
   }
-
   body {
     @apply bg-background text-foreground;
     font-family: "Golos Text", sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-
   h1,
   h2,
   h3,
   .font-display {
     font-family: "Bebas Neue", sans-serif;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
   }
 }
 
-@layer utilities {
-  .glass {
-    background: rgba(255, 255, 255, 0.04);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-  }
-
-  .glass-hover {
-    transition: all 0.2s ease;
-  }
-  .glass-hover:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.12);
-  }
-
-  .neon-border-green {
-    border: 1px solid hsl(var(--neon-green) / 0.4);
-    box-shadow:
-      0 0 12px hsl(var(--neon-green) / 0.15),
-      inset 0 0 12px hsl(var(--neon-green) / 0.05);
-  }
-
-  .neon-border-orange {
-    border: 1px solid hsl(var(--neon-orange) / 0.4);
-    box-shadow:
-      0 0 12px hsl(var(--neon-orange) / 0.15),
-      inset 0 0 12px hsl(var(--neon-orange) / 0.05);
-  }
-
-  .neon-text-green {
-    color: hsl(var(--neon-green));
-    text-shadow: 0 0 20px hsl(var(--neon-green) / 0.5);
-  }
-
-  .score-display {
-    font-family: "Bebas Neue", sans-serif;
-    font-size: 2.5rem;
-    line-height: 1;
-    letter-spacing: 0.05em;
-  }
-
-  .tab-active {
-    background: linear-gradient(
-      135deg,
-      hsl(var(--neon-green) / 0.2),
-      hsl(var(--neon-green) / 0.05)
-    );
-    border-bottom: 2px solid hsl(var(--neon-green));
-    color: hsl(var(--neon-green));
-  }
-
-  .sport-tag-football {
-    background: hsl(var(--sport-football) / 0.15);
-    color: hsl(var(--sport-football));
-    border: 1px solid hsl(var(--sport-football) / 0.3);
-  }
-  .sport-tag-hockey {
-    background: hsl(var(--sport-hockey) / 0.15);
-    color: hsl(var(--sport-hockey));
-    border: 1px solid hsl(var(--sport-hockey) / 0.3);
-  }
-  .sport-tag-basketball {
-    background: hsl(var(--sport-basketball) / 0.15);
-    color: hsl(var(--sport-basketball));
-    border: 1px solid hsl(var(--sport-basketball) / 0.3);
-  }
-  .sport-tag-volleyball {
-    background: hsl(var(--sport-volleyball) / 0.15);
-    color: hsl(var(--sport-volleyball));
-    border: 1px solid hsl(var(--sport-volleyball) / 0.3);
-  }
+/* ── FlashScore match row ── */
+.match-row {
+  display: grid;
+  grid-template-columns: 48px 1fr 52px;
+  align-items: center;
+  min-height: 46px;
+  padding: 6px 12px;
+  border-bottom: 1px solid hsl(var(--border));
+  cursor: pointer;
+  transition: background 0.1s;
+  gap: 8px;
+}
+.match-row:hover {
+  background: hsl(var(--secondary));
+}
+.match-row:active {
+  background: hsl(var(--secondary) / 0.6);
 }
 
-/* Live pulse animation */
-@keyframes live-pulse {
+.league-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 5px;
+  background: hsl(var(--background));
+  border-bottom: 1px solid hsl(var(--border));
+  position: sticky;
+  top: 96px;
+  z-index: 10;
+}
+
+.score-col {
+  font-family: "Bebas Neue", sans-serif;
+  font-size: 1.3rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  text-align: center;
+}
+
+/* Live dot */
+@keyframes livepulse {
   0%,
   100% {
     opacity: 1;
-    transform: scale(1);
   }
   50% {
-    opacity: 0.4;
-    transform: scale(0.85);
+    opacity: 0.25;
   }
 }
-
-@keyframes ping-slow {
-  0% {
-    transform: scale(1);
-    opacity: 0.8;
-  }
-  100% {
-    transform: scale(2);
-    opacity: 0;
-  }
+.live-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: hsl(var(--live));
+  animation: livepulse 1.3s ease-in-out infinite;
+  flex-shrink: 0;
 }
 
-@keyframes fade-in {
+/* Sport pills */
+.sport-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.12s;
+  color: hsl(var(--muted-foreground));
+  background: transparent;
+}
+.sport-pill:hover {
+  color: hsl(var(--foreground));
+  background: hsl(var(--secondary));
+}
+.sport-pill.active {
+  background: hsl(var(--primary) / 0.12);
+  border-color: hsl(var(--primary) / 0.45);
+  color: hsl(var(--primary));
+}
+
+/* Animations */
+@keyframes fadeUp {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
-@keyframes slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.fade-up {
+  animation: fadeUp 0.22s ease forwards;
 }
 
-@keyframes score-flash {
+@keyframes scoreFlash {
   0%,
   100% {
-    color: hsl(var(--foreground));
+    color: inherit;
   }
-  50% {
-    color: hsl(var(--neon-green));
-    text-shadow: 0 0 20px hsl(var(--neon-green) / 0.8);
+  40% {
+    color: hsl(var(--primary));
+    text-shadow: 0 0 12px hsl(var(--primary) / 0.5);
   }
 }
-
-.animate-live-pulse {
-  animation: live-pulse 1.5s ease-in-out infinite;
-}
-.animate-ping-slow {
-  animation: ping-slow 1.5s ease-out infinite;
-}
-.animate-fade-in {
-  animation: fade-in 0.4s ease-out forwards;
-}
-.animate-slide-up {
-  animation: slide-up 0.5s ease-out forwards;
-}
-.animate-score-flash {
-  animation: score-flash 0.8s ease-in-out 3;
+.score-flash {
+  animation: scoreFlash 0.9s ease 2;
 }
 
-/* Staggered animations */
-.stagger-1 {
-  animation-delay: 0.05s;
-  opacity: 0;
-}
-.stagger-2 {
-  animation-delay: 0.1s;
-  opacity: 0;
-}
-.stagger-3 {
-  animation-delay: 0.15s;
-  opacity: 0;
-}
-.stagger-4 {
-  animation-delay: 0.2s;
-  opacity: 0;
-}
-.stagger-5 {
-  animation-delay: 0.25s;
-  opacity: 0;
-}
-.stagger-6 {
-  animation-delay: 0.3s;
-  opacity: 0;
-}
-
-/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 4px;
+  width: 3px;
+  height: 3px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
@@ -247,4 +182,25 @@
 ::-webkit-scrollbar-thumb {
   background: hsl(var(--border));
   border-radius: 2px;
+}
+
+.sport-tag-football {
+  background: hsl(var(--sport-football) / 0.12);
+  color: hsl(var(--sport-football));
+  border: 1px solid hsl(var(--sport-football) / 0.2);
+}
+.sport-tag-hockey {
+  background: hsl(var(--sport-hockey) / 0.12);
+  color: hsl(var(--sport-hockey));
+  border: 1px solid hsl(var(--sport-hockey) / 0.2);
+}
+.sport-tag-basketball {
+  background: hsl(var(--sport-basketball) / 0.12);
+  color: hsl(var(--sport-basketball));
+  border: 1px solid hsl(var(--sport-basketball) / 0.2);
+}
+.sport-tag-volleyball {
+  background: hsl(var(--sport-volleyball) / 0.12);
+  color: hsl(var(--sport-volleyball));
+  border: 1px solid hsl(var(--sport-volleyball) / 0.2);
 }

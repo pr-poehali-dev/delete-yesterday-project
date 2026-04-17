@@ -1,4 +1,4 @@
-import { Match, SPORT_CONFIG, TEAM_STATS } from '@/data/sportsData';
+import { Match, SPORT_CONFIG, TEAM_STATS, LEAGUE_MAP } from '@/data/sportsData';
 import Icon from '@/components/ui/icon';
 import TeamLogo from '@/components/TeamLogo';
 import { SportLeagueLogo } from '@/components/LeagueLogos';
@@ -10,6 +10,7 @@ interface MatchDetailProps {
 
 export default function MatchDetail({ match, onClose }: MatchDetailProps) {
   const sport = SPORT_CONFIG[match.sport];
+  const league = LEAGUE_MAP[match.leagueId] ?? null;
   const stats = TEAM_STATS[match.sport];
   const isLive = match.status === 'live';
   const isFinished = match.status === 'finished';
@@ -26,7 +27,10 @@ export default function MatchDetail({ match, onClose }: MatchDetailProps) {
         <div className="glass rounded-2xl p-6 mb-4">
           <div className="flex items-center justify-between mb-5">
             <span className={`inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full font-medium ${sport.tagClass}`}>
-              <SportLeagueLogo sport={match.sport} size={20} />
+              {league?.logo
+                ? <img src={league.logo} alt={league.shortName} className="w-5 h-5 object-contain" onError={e => { (e.target as HTMLImageElement).style.display='none'; }} />
+                : <SportLeagueLogo sport={match.sport} size={20} />
+              }
               {match.league}
             </span>
             {isLive && (

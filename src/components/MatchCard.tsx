@@ -8,13 +8,13 @@ interface MatchCardProps {
   compact?: boolean;
 }
 
-interface SportInfo { label: string; emoji: string; color: string; tagClass: string; leagueLogo: string; leagueName: string }
+interface SportInfo { label: string; emoji: string; color: string; tagClass: string }
 
-function LeagueBadge({ sport, sportType }: { sport: SportInfo; sportType: import('@/data/sportsData').SportType }) {
+function LeagueBadge({ sport, sportType, leagueName }: { sport: SportInfo; sportType: import('@/data/sportsData').SportType; leagueName: string }) {
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full font-medium ${sport.tagClass}`}>
       <SportLeagueLogo sport={sportType} size={14} />
-      {sport.leagueName}
+      {leagueName}
     </span>
   );
 }
@@ -30,7 +30,7 @@ export default function MatchCard({ match, onClick, compact = false }: MatchCard
       className={`glass glass-hover rounded-xl p-4 cursor-pointer transition-all duration-200 ${isLive ? 'neon-border-green' : 'border border-border'} ${onClick ? 'hover:scale-[1.01]' : ''}`}
     >
       <div className="flex items-center justify-between mb-3">
-        <LeagueBadge sport={sport} sportType={match.sport} />
+        <LeagueBadge sport={sport} sportType={match.sport} leagueName={match.league} />
         <div className="flex items-center gap-2">
           {isLive && (
             <div className="flex items-center gap-1.5">

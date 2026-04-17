@@ -8,10 +8,15 @@ const SPORT_EMOJIS: Record<string, string> = {
 };
 
 // Convert TheSportsDB normalized match to our frontend Match format
+const SPORT_TO_LEAGUE_ID: Record<string, string> = {
+  football: 'rpl', hockey: 'khl', basketball: 'vtb', volleyball: 'superliga',
+};
+
 function apiMatchToMatch(m: ApiMatch): Match {
   return {
     id: m.id,
     sport: m.sport as SportType,
+    leagueId: SPORT_TO_LEAGUE_ID[m.sport] ?? m.sport,
     league: m.league,
     venue: m.venue || '',
     homeTeam: {
