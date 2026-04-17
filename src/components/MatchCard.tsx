@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Match, SPORT_CONFIG } from '@/data/sportsData';
-import TeamLogo from '@/components/TeamLogo';
+import TeamLogo, { proxyImg } from '@/components/TeamLogo';
 
 interface MatchCardProps {
   match: Match;
@@ -16,7 +16,7 @@ function LeagueBadge({ sport }: { sport: SportInfo }) {
     <span className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full font-medium ${sport.tagClass}`}>
       {!imgError ? (
         <img
-          src={sport.leagueLogo}
+          src={proxyImg(sport.leagueLogo)}
           alt={sport.leagueName}
           className="w-3.5 h-3.5 object-contain"
           onError={() => setImgError(true)}

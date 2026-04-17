@@ -4,6 +4,7 @@ import MatchCard from '@/components/MatchCard';
 import MatchDetail from '@/components/MatchDetail';
 import NotificationBell from '@/components/NotificationBell';
 import { useSportsData } from '@/hooks/useSportsData';
+import { proxyImg } from '@/components/TeamLogo';
 import {
   ALL_TEAMS,
   SPORT_CONFIG,
@@ -32,7 +33,7 @@ function SportFilterBar({ value, onChange }: { value: SportType | 'all'; onChang
         >
           {item.logo && !logoErrors[item.id] ? (
             <img
-              src={item.logo}
+              src={proxyImg(item.logo)}
               alt={item.label}
               className="w-4 h-4 object-contain"
               onError={() => setLogoErrors(e => ({ ...e, [item.id]: true }))}

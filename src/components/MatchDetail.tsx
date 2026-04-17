@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Match, SPORT_CONFIG, TEAM_STATS } from '@/data/sportsData';
 import Icon from '@/components/ui/icon';
-import TeamLogo from '@/components/TeamLogo';
+import TeamLogo, { proxyImg } from '@/components/TeamLogo';
 
 interface MatchDetailProps {
   match: Match;
@@ -13,7 +13,7 @@ function LeagueLogo({ src, fallback, name }: { src: string; fallback: string; na
   if (err) return <span className="text-xl">{fallback}</span>;
   return (
     <img
-      src={src}
+      src={proxyImg(src)}
       alt={name}
       className="w-6 h-6 object-contain"
       onError={() => setErr(true)}

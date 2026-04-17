@@ -131,20 +131,42 @@ def handler(event: dict, context) -> dict:
     Получение матчей российских чемпионатов через TheSportsDB.
     РПЛ, КХЛ, Единая Лига ВТБ, Суперлига.
     Query: type (live|upcoming|finished|all), sport (football|hockey|basketball|volleyball|all)
+    Прокси изображений: ?img=<url> — возвращает картинку через сервер (обход CORS/hotlink)
     """
+    CORS_HEADERS = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+    }
+
     if event.get('httpMethod') == 'OPTIONS':
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Methods': 'GET, OPTIONS',
-                'Access-Control-Allow-Headers': 'Content-Type',
-                'Access-Control-Max-Age': '86400',
-            },
-            'body': ''
-        }
+        return {'statusCode': 200, 'headers': {**CORS_HEADERS, 'Access-Control-Max-Age': '86400'}, 'body': ''}
 
     params = event.get('queryStringParameters') or {}
+
+    # Image proxy — fetch image from thesportsdb and return as base64
+    img_url = params.get('img', '')
+    if img_url:
+        allowed_hosts = ('www.thesportsdb.com', 'thesportsdb.com')
+        from urllib.parse import urlparse
+        parsed = urlparse(img_url)
+        if parsed.hostname not in allowed_hosts:
+            return {'statusCode': 403, 'headers': CORS_HEADERS, 'body': 'Forbidden'}
+        try:
+            import base64
+            req = urllib.request.Request(img_url, headers={'User-Agent': 'SportLiveApp/1.0', 'Referer': 'https://www.thesportsdb.com/'})
+            with urllib.request.urlopen(req, timeout=8) as resp:
+                content_type = resp.headers.get('Content-Type', 'image/png')
+                img_data = base64.b64encode(resp.read()).decode()
+            return {
+                'statusCode': 200,
+                'headers': {**CORS_HEADERS, 'Content-Type': content_type, 'Cache-Control': 'public, max-age=86400'},
+                'body': img_data,
+                'isBase64Encoded': True,
+            }
+        except Exception as e:
+            return {'statusCode': 502, 'headers': CORS_HEADERS, 'body': str(e)}
+
     match_type = params.get('type', 'all')
     sport_filter = params.get('sport', 'all')
 
