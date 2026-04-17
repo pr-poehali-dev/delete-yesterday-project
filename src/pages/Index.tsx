@@ -4,7 +4,7 @@ import MatchCard from '@/components/MatchCard';
 import MatchDetail from '@/components/MatchDetail';
 import NotificationBell from '@/components/NotificationBell';
 import { useSportsData } from '@/hooks/useSportsData';
-import { proxyImg } from '@/components/TeamLogo';
+import { SportLeagueLogo, LogoAllSports } from '@/components/LeagueLogos';
 import {
   ALL_TEAMS,
   SPORT_CONFIG,
@@ -13,15 +13,12 @@ import {
 } from '@/data/sportsData';
 
 function SportFilterBar({ value, onChange }: { value: SportType | 'all'; onChange: (v: SportType | 'all') => void }) {
-  const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
-  const items: { id: SportType | 'all'; label: string; emoji: string; logo?: string }[] = [
-    { id: 'all', label: 'Все', emoji: '🏆' },
-    ...(['football', 'hockey', 'basketball', 'volleyball'] as SportType[]).map(s => ({
-      id: s,
-      label: SPORT_CONFIG[s].leagueName,
-      emoji: SPORT_CONFIG[s].emoji,
-      logo: SPORT_CONFIG[s].leagueLogo,
-    })),
+  const items: { id: SportType | 'all'; label: string }[] = [
+    { id: 'all',        label: 'Все'       },
+    { id: 'football',   label: 'РПЛ'       },
+    { id: 'hockey',     label: 'КХЛ'       },
+    { id: 'basketball', label: 'ВТБ'       },
+    { id: 'volleyball', label: 'Суперлига' },
   ];
   return (
     <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
@@ -31,16 +28,10 @@ function SportFilterBar({ value, onChange }: { value: SportType | 'all'; onChang
           onClick={() => onChange(item.id)}
           className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${value === item.id ? 'tab-active' : 'glass text-muted-foreground hover:text-foreground'}`}
         >
-          {item.logo && !logoErrors[item.id] ? (
-            <img
-              src={proxyImg(item.logo)}
-              alt={item.label}
-              className="w-4 h-4 object-contain"
-              onError={() => setLogoErrors(e => ({ ...e, [item.id]: true }))}
-            />
-          ) : (
-            <span>{item.emoji}</span>
-          )}
+          {item.id === 'all'
+            ? <LogoAllSports size={16} />
+            : <SportLeagueLogo sport={item.id} size={16} />
+          }
           <span>{item.label}</span>
         </button>
       ))}
