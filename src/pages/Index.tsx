@@ -9,7 +9,7 @@ import { useSportsData } from '@/hooks/useSportsData';
 import TeamLogo from '@/components/TeamLogo';
 import {
   ALL_TEAMS, SPORT_CONFIG, SPORT_LEAGUES, LEAGUE_MAP,
-  Match, SportType, League,
+  Match, SportType,
 } from '@/data/sportsData';
 
 type Tab = 'live' | 'schedule' | 'results' | 'favorites';
@@ -50,6 +50,8 @@ export default function Index() {
   const [notifIds, setNotifIds] = useState<string[]>(loadFavs);
   const [mounted, setMounted] = useState(false);
   const [favSport, setFavSport] = useState<SportType>('football');
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState('');
 
   const { liveMatches, upcomingMatches, finishedMatches, loading, usingFallback, refresh } = useSportsData();
 
@@ -57,6 +59,20 @@ export default function Index() {
 
   const toggleFav = (id: string) => setFavTeamIds(prev => { const n = prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]; saveFavs(n); return n; });
   const toggleNotif = (id: string) => setNotifIds(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+
+  const allMatches = useMemo(() => [...liveMatches, ...upcomingMatches, ...finishedMatches], [liveMatches, upcomingMatches, finishedMatches]);
+
+  const searchResults = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return { matches: [] as Match[], teams: [] as typeof ALL_TEAMS };
+    const matches = allMatches.filter(m =>
+      m.homeTeam.name.toLowerCase().includes(q) ||
+      m.awayTeam.name.toLowerCase().includes(q) ||
+      m.league.toLowerCase().includes(q)
+    ).slice(0, 10);
+    const teams = ALL_TEAMS.filter(t => t.name.toLowerCase().includes(q)).slice(0, 6);
+    return { matches, teams };
+  }, [query, allMatches]);
 
   const filterSport = (arr: Match[]) => sport === 'all' ? arr : arr.filter(m => m.sport === sport);
 
@@ -79,6 +95,88 @@ export default function Index() {
   return (
     <div className={`min-h-screen bg-background flex flex-col max-w-lg mx-auto ${mounted ? 'fade-up' : 'opacity-0'}`}>
 
+      {/* ── Search overlay ── */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-50 bg-background flex flex-col max-w-lg mx-auto">
+          {/* Search input */}
+          <div className="flex items-center gap-2 px-3 h-14 border-b border-border flex-shrink-0">
+            <Icon name="Search" size={16} className="text-muted-foreground flex-shrink-0" />
+            <input
+              autoFocus
+              value={query}
+              onChange={e => setQuery(e.target.value)}
+              placeholder="Команда, лига, матч..."
+              className="flex-1 bg-transparent text-[15px] outline-none placeholder:text-muted-foreground"
+            />
+            {query && (
+              <button onClick={() => setQuery('')} className="w-7 h-7 flex items-center justify-center text-muted-foreground hover:text-foreground">
+                <Icon name="X" size={14} />
+              </button>
+            )}
+            <button onClick={() => { setSearchOpen(false); setQuery(''); }} className="text-[13px] text-primary font-semibold px-1">
+              Отмена
+            </button>
+          </div>
+
+          {/* Results */}
+          <div className="flex-1 overflow-y-auto">
+            {!query ? (
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+                <Icon name="Search" size={40} className="opacity-15" />
+                <p className="text-sm">Введите название команды или лиги</p>
+              </div>
+            ) : searchResults.matches.length === 0 && searchResults.teams.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-20 text-muted-foreground gap-3">
+                <Icon name="SearchX" size={40} className="opacity-15" />
+                <p className="font-semibold">Ничего не найдено</p>
+                <p className="text-sm opacity-70">«{query}»</p>
+              </div>
+            ) : (
+              <>
+                {/* Teams */}
+                {searchResults.teams.length > 0 && (
+                  <div>
+                    <div className="px-3 pt-4 pb-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Команды
+                    </div>
+                    {searchResults.teams.map(team => {
+                      const isFav = favTeamIds.includes(team.id);
+                      return (
+                        <div key={team.id} className="flex items-center gap-3 px-3 py-2.5 border-b border-border hover:bg-secondary transition-colors">
+                          <TeamLogo logo={team.logo} emoji={team.emoji} name={team.name} size="md" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[14px] font-semibold truncate">{team.name}</p>
+                            <p className="text-[12px] text-muted-foreground">{team.city} · {SPORT_CONFIG[team.sport].label}</p>
+                          </div>
+                          <button
+                            onClick={() => toggleFav(team.id)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors flex-shrink-0"
+                          >
+                            <Icon name="Star" size={15} className={isFav ? 'text-primary' : 'text-muted-foreground'} style={isFav ? { fill: 'hsl(var(--primary))' } : {}} />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Matches */}
+                {searchResults.matches.length > 0 && (
+                  <div>
+                    <div className="px-3 pt-4 pb-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                      Матчи
+                    </div>
+                    {searchResults.matches.map(m => (
+                      <MatchRow key={m.id} match={m} onClick={() => { setSelectedMatch(m); setSearchOpen(false); setQuery(''); }} />
+                    ))}
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ── Header ── */}
       <header className="sticky top-0 z-30 bg-background border-b border-border">
         {/* Logo row */}
@@ -95,6 +193,9 @@ export default function Index() {
                 <span className="text-[11px] font-bold text-red-400">{liveMatches.length}</span>
               </div>
             )}
+            <button onClick={() => setSearchOpen(true)} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors">
+              <Icon name="Search" size={16} className="text-muted-foreground" />
+            </button>
             <button onClick={refresh} className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-secondary transition-colors">
               <Icon name="RefreshCw" size={14} className="text-muted-foreground" />
             </button>
