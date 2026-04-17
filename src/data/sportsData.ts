@@ -52,38 +52,40 @@ export interface PlayerStat {
   aces?: number;
 }
 
+const CDN = 'https://cdn.poehali.dev/projects/53ad149e-d188-410f-a242-754571d71c84/bucket/logos';
+
 export const SPORT_CONFIG: Record<SportType, { label: string; emoji: string; color: string; tagClass: string; leagueLogo: string; leagueName: string }> = {
-  football:   { label: 'Футбол',    emoji: '⚽', color: 'hsl(var(--sport-football))',   tagClass: 'sport-tag-football',   leagueLogo: 'https://www.thesportsdb.com/images/media/league/badge/4355.png',  leagueName: 'РПЛ' },
-  hockey:     { label: 'Хоккей',    emoji: '🏒', color: 'hsl(var(--sport-hockey))',     tagClass: 'sport-tag-hockey',     leagueLogo: 'https://www.thesportsdb.com/images/media/league/badge/4920.png',  leagueName: 'КХЛ' },
-  basketball: { label: 'Баскетбол', emoji: '🏀', color: 'hsl(var(--sport-basketball))', tagClass: 'sport-tag-basketball', leagueLogo: 'https://www.thesportsdb.com/images/media/league/badge/4476.png',  leagueName: 'Лига ВТБ' },
-  volleyball: { label: 'Волейбол',  emoji: '🏐', color: 'hsl(var(--sport-volleyball))', tagClass: 'sport-tag-volleyball', leagueLogo: 'https://www.thesportsdb.com/images/media/league/badge/4545.png',  leagueName: 'Суперлига' },
+  football:   { label: 'Футбол',    emoji: '⚽', color: 'hsl(var(--sport-football))',   tagClass: 'sport-tag-football',   leagueLogo: `${CDN}/league_football.png`,   leagueName: 'РПЛ' },
+  hockey:     { label: 'Хоккей',    emoji: '🏒', color: 'hsl(var(--sport-hockey))',     tagClass: 'sport-tag-hockey',     leagueLogo: `${CDN}/league_hockey.png`,     leagueName: 'КХЛ' },
+  basketball: { label: 'Баскетбол', emoji: '🏀', color: 'hsl(var(--sport-basketball))', tagClass: 'sport-tag-basketball', leagueLogo: `${CDN}/league_basketball.png`, leagueName: 'Лига ВТБ' },
+  volleyball: { label: 'Волейбол',  emoji: '🏐', color: 'hsl(var(--sport-volleyball))', tagClass: 'sport-tag-volleyball', leagueLogo: `${CDN}/league_volleyball.png`, leagueName: 'Суперлига' },
 };
 
 export const ALL_TEAMS: Team[] = [
   // Football
-  { id: 'spartak', name: 'Спартак', shortName: 'СПА', emoji: '🔴', sport: 'football', city: 'Москва', wins: 18, losses: 6, draws: 6 },
-  { id: 'cska-f', name: 'ЦСКА', shortName: 'ЦСК', emoji: '🟡', sport: 'football', city: 'Москва', wins: 20, losses: 4, draws: 6 },
-  { id: 'zenit', name: 'Зенит', shortName: 'ЗЕН', emoji: '🔵', sport: 'football', city: 'СПб', wins: 22, losses: 4, draws: 4 },
-  { id: 'lokomotiv', name: 'Локомотив', shortName: 'ЛОК', emoji: '🟢', sport: 'football', city: 'Москва', wins: 14, losses: 10, draws: 6 },
-  { id: 'krasnodar', name: 'Краснодар', shortName: 'КРД', emoji: '🟤', sport: 'football', city: 'Краснодар', wins: 16, losses: 8, draws: 6 },
-  { id: 'dynamo-f', name: 'Динамо', shortName: 'ДИН', emoji: '⚪', sport: 'football', city: 'Москва', wins: 12, losses: 12, draws: 6 },
+  { id: 'spartak',     name: 'Спартак',          shortName: 'СПА', emoji: '🔴', logo: `${CDN}/football_spartak.png`,   sport: 'football',   city: 'Москва',        wins: 18, losses: 6,  draws: 6 },
+  { id: 'cska-f',      name: 'ЦСКА',             shortName: 'ЦСК', emoji: '🟡', logo: `${CDN}/football_cska.png`,      sport: 'football',   city: 'Москва',        wins: 20, losses: 4,  draws: 6 },
+  { id: 'zenit',       name: 'Зенит',            shortName: 'ЗЕН', emoji: '🔵', logo: `${CDN}/football_zenit.png`,     sport: 'football',   city: 'СПб',           wins: 22, losses: 4,  draws: 4 },
+  { id: 'lokomotiv',   name: 'Локомотив',        shortName: 'ЛОК', emoji: '🟢', logo: `${CDN}/football_lokomotiv.png`, sport: 'football',   city: 'Москва',        wins: 14, losses: 10, draws: 6 },
+  { id: 'krasnodar',   name: 'Краснодар',        shortName: 'КРД', emoji: '🟤', logo: `${CDN}/football_krasnodar.png`, sport: 'football',   city: 'Краснодар',     wins: 16, losses: 8,  draws: 6 },
+  { id: 'dynamo-f',    name: 'Динамо',           shortName: 'ДИН', emoji: '⚪', logo: `${CDN}/football_dynamo.png`,    sport: 'football',   city: 'Москва',        wins: 12, losses: 12, draws: 6 },
   // Hockey
-  { id: 'ska', name: 'СКА', shortName: 'СКА', emoji: '⚡', sport: 'hockey', city: 'СПб', wins: 34, losses: 12 },
-  { id: 'cska-h', name: 'ЦСКА', shortName: 'ЦСК', emoji: '🔴', sport: 'hockey', city: 'Москва', wins: 36, losses: 10 },
-  { id: 'ak-bars', name: 'Ак Барс', shortName: 'АКБ', emoji: '🐯', sport: 'hockey', city: 'Казань', wins: 30, losses: 16 },
-  { id: 'metallurg', name: 'Металлург', shortName: 'МЕТ', emoji: '⚙️', sport: 'hockey', city: 'Магнитогорск', wins: 28, losses: 18 },
-  { id: 'avangard', name: 'Авангард', shortName: 'АВА', emoji: '🦅', sport: 'hockey', city: 'Омск', wins: 25, losses: 21 },
-  { id: 'dynamo-h', name: 'Динамо', shortName: 'ДИН', emoji: '🔵', sport: 'hockey', city: 'Москва', wins: 22, losses: 24 },
+  { id: 'ska',         name: 'СКА',              shortName: 'СКА', emoji: '⚡', logo: `${CDN}/hockey_ska.png`,         sport: 'hockey',     city: 'СПб',           wins: 34, losses: 12 },
+  { id: 'cska-h',      name: 'ЦСКА',             shortName: 'ЦСК', emoji: '🔴', logo: `${CDN}/hockey_cska.png`,        sport: 'hockey',     city: 'Москва',        wins: 36, losses: 10 },
+  { id: 'ak-bars',     name: 'Ак Барс',          shortName: 'АКБ', emoji: '🐯', logo: `${CDN}/hockey_akbars.png`,      sport: 'hockey',     city: 'Казань',        wins: 30, losses: 16 },
+  { id: 'metallurg',   name: 'Металлург',        shortName: 'МЕТ', emoji: '⚙️', logo: `${CDN}/hockey_metallurg.png`,   sport: 'hockey',     city: 'Магнитогорск',  wins: 28, losses: 18 },
+  { id: 'avangard',    name: 'Авангард',         shortName: 'АВА', emoji: '🦅', logo: `${CDN}/hockey_avangard.png`,    sport: 'hockey',     city: 'Омск',          wins: 25, losses: 21 },
+  { id: 'dynamo-h',    name: 'Динамо',           shortName: 'ДИН', emoji: '🔵', logo: `${CDN}/hockey_dynamo.png`,      sport: 'hockey',     city: 'Москва',        wins: 22, losses: 24 },
   // Basketball
-  { id: 'cska-b', name: 'ЦСКА', shortName: 'ЦСК', emoji: '🏆', sport: 'basketball', city: 'Москва', wins: 28, losses: 4 },
-  { id: 'zenit-b', name: 'Зенит', shortName: 'ЗЕН', emoji: '🔵', sport: 'basketball', city: 'СПб', wins: 20, losses: 12 },
-  { id: 'unics', name: 'УНИКС', shortName: 'УНИ', emoji: '🟡', sport: 'basketball', city: 'Казань', wins: 18, losses: 14 },
-  { id: 'lokomotiv-b', name: 'Локомотив-Кубань', shortName: 'ЛОК', emoji: '🔴', sport: 'basketball', city: 'Краснодар', wins: 16, losses: 16 },
+  { id: 'cska-b',      name: 'ЦСКА',             shortName: 'ЦСК', emoji: '🏆', logo: `${CDN}/basketball_cska.png`,      sport: 'basketball', city: 'Москва',    wins: 28, losses: 4  },
+  { id: 'zenit-b',     name: 'Зенит',            shortName: 'ЗЕН', emoji: '🔵', logo: `${CDN}/basketball_zenit.png`,     sport: 'basketball', city: 'СПб',       wins: 20, losses: 12 },
+  { id: 'unics',       name: 'УНИКС',            shortName: 'УНИ', emoji: '🟡', logo: `${CDN}/basketball_unics.png`,     sport: 'basketball', city: 'Казань',    wins: 18, losses: 14 },
+  { id: 'lokomotiv-b', name: 'Локомотив-Кубань', shortName: 'ЛОК', emoji: '🔴', logo: `${CDN}/basketball_lokomotiv.png`, sport: 'basketball', city: 'Краснодар', wins: 16, losses: 16 },
   // Volleyball
-  { id: 'zenit-v', name: 'Зенит-Казань', shortName: 'ЗЕН', emoji: '🏐', sport: 'volleyball', city: 'Казань', wins: 22, losses: 4 },
-  { id: 'kuzbasss', name: 'Кузбасс', shortName: 'КУЗ', emoji: '⚫', sport: 'volleyball', city: 'Кемерово', wins: 18, losses: 8 },
-  { id: 'belgorod', name: 'Белогорье', shortName: 'БЕЛ', emoji: '⚪', sport: 'volleyball', city: 'Белгород', wins: 16, losses: 10 },
-  { id: 'lokomotiv-v', name: 'Локомотив', shortName: 'ЛОК', emoji: '🟢', sport: 'volleyball', city: 'Новосибирск', wins: 14, losses: 12 },
+  { id: 'zenit-v',     name: 'Зенит-Казань', shortName: 'ЗЕН', emoji: '🏐', logo: `${CDN}/volleyball_zenit.png`,     sport: 'volleyball', city: 'Казань',     wins: 22, losses: 4  },
+  { id: 'kuzbasss',    name: 'Кузбасс',      shortName: 'КУЗ', emoji: '⚫', logo: `${CDN}/volleyball_kuzbass.png`,   sport: 'volleyball', city: 'Кемерово',   wins: 18, losses: 8  },
+  { id: 'belgorod',    name: 'Белогорье',    shortName: 'БЕЛ', emoji: '⚪', logo: `${CDN}/volleyball_belgorod.png`,  sport: 'volleyball', city: 'Белгород',   wins: 16, losses: 10 },
+  { id: 'lokomotiv-v', name: 'Локомотив',    shortName: 'ЛОК', emoji: '🟢', logo: `${CDN}/volleyball_lokomotiv.png`,sport: 'volleyball', city: 'Новосибирск',wins: 14, losses: 12 },
 ];
 
 const getTeam = (id: string): Team => ALL_TEAMS.find(t => t.id === id)!;
