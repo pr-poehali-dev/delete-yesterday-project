@@ -11,6 +11,42 @@ import {
   SportType,
 } from '@/data/sportsData';
 
+function SportFilterBar({ value, onChange }: { value: SportType | 'all'; onChange: (v: SportType | 'all') => void }) {
+  const [logoErrors, setLogoErrors] = useState<Record<string, boolean>>({});
+  const items: { id: SportType | 'all'; label: string; emoji: string; logo?: string }[] = [
+    { id: 'all', label: 'Все', emoji: '🏆' },
+    ...(['football', 'hockey', 'basketball', 'volleyball'] as SportType[]).map(s => ({
+      id: s,
+      label: SPORT_CONFIG[s].leagueName,
+      emoji: SPORT_CONFIG[s].emoji,
+      logo: SPORT_CONFIG[s].leagueLogo,
+    })),
+  ];
+  return (
+    <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+      {items.map(item => (
+        <button
+          key={item.id}
+          onClick={() => onChange(item.id)}
+          className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${value === item.id ? 'tab-active' : 'glass text-muted-foreground hover:text-foreground'}`}
+        >
+          {item.logo && !logoErrors[item.id] ? (
+            <img
+              src={item.logo}
+              alt={item.label}
+              className="w-4 h-4 object-contain"
+              onError={() => setLogoErrors(e => ({ ...e, [item.id]: true }))}
+            />
+          ) : (
+            <span>{item.emoji}</span>
+          )}
+          <span>{item.label}</span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
 type Tab = 'home' | 'favorites' | 'schedule' | 'history';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
@@ -20,13 +56,6 @@ const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'history', label: 'История', icon: 'Trophy' },
 ];
 
-const SPORTS: { id: SportType | 'all'; label: string; emoji: string }[] = [
-  { id: 'all', label: 'Все', emoji: '🏆' },
-  { id: 'football', label: 'Футбол', emoji: '⚽' },
-  { id: 'hockey', label: 'Хоккей', emoji: '🏒' },
-  { id: 'basketball', label: 'Баскетбол', emoji: '🏀' },
-  { id: 'volleyball', label: 'Волейбол', emoji: '🏐' },
-];
 
 const STORAGE_KEY = 'sport_fav_teams';
 
@@ -151,18 +180,7 @@ export default function Index() {
               </div>
             </div>
 
-            <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
-              {SPORTS.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => setSportFilter(s.id)}
-                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${sportFilter === s.id ? 'tab-active' : 'glass text-muted-foreground hover:text-foreground'}`}
-                >
-                  <span>{s.emoji}</span>
-                  <span>{s.label}</span>
-                </button>
-              ))}
-            </div>
+            <SportFilterBar value={sportFilter} onChange={setSportFilter} />
 
             <div>
               <h2 className="font-display text-xl text-muted-foreground mb-3">БЛИЖАЙШИЕ МАТЧИ</h2>
@@ -258,19 +276,7 @@ export default function Index() {
           <div className="pt-4">
             <h2 className="font-display text-2xl mb-4">РАСПИСАНИЕ</h2>
 
-            <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
-              {SPORTS.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => setSportFilter(s.id)}
-                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${sportFilter === s.id ? 'tab-active' : 'glass text-muted-foreground hover:text-foreground'}`}
-                >
-                  <span>{s.emoji}</span>
-                  <span className="hidden sm:inline">{s.label}</span>
-                  <span className="sm:hidden">{s.emoji === '🏆' ? 'Все' : ''}</span>
-                </button>
-              ))}
-            </div>
+            <SportFilterBar value={sportFilter} onChange={setSportFilter} />
 
             {(() => {
               const filtered = filterBySport(upcomingMatches);
@@ -313,18 +319,7 @@ export default function Index() {
           <div className="pt-4">
             <h2 className="font-display text-2xl mb-4">РЕЗУЛЬТАТЫ</h2>
 
-            <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
-              {SPORTS.map(s => (
-                <button
-                  key={s.id}
-                  onClick={() => setSportFilter(s.id)}
-                  className={`flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${sportFilter === s.id ? 'tab-active' : 'glass text-muted-foreground hover:text-foreground'}`}
-                >
-                  <span>{s.emoji}</span>
-                  <span className="hidden sm:inline">{s.label}</span>
-                </button>
-              ))}
-            </div>
+            <SportFilterBar value={sportFilter} onChange={setSportFilter} />
 
             <div className="space-y-3">
               {filterBySport(finishedMatches).map((match, i) => (

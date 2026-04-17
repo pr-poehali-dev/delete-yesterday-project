@@ -52,11 +52,11 @@ export interface PlayerStat {
   aces?: number;
 }
 
-export const SPORT_CONFIG: Record<SportType, { label: string; emoji: string; color: string; tagClass: string }> = {
-  football: { label: 'Футбол', emoji: '⚽', color: 'hsl(var(--sport-football))', tagClass: 'sport-tag-football' },
-  hockey: { label: 'Хоккей', emoji: '🏒', color: 'hsl(var(--sport-hockey))', tagClass: 'sport-tag-hockey' },
-  basketball: { label: 'Баскетбол', emoji: '🏀', color: 'hsl(var(--sport-basketball))', tagClass: 'sport-tag-basketball' },
-  volleyball: { label: 'Волейбол', emoji: '🏐', color: 'hsl(var(--sport-volleyball))', tagClass: 'sport-tag-volleyball' },
+export const SPORT_CONFIG: Record<SportType, { label: string; emoji: string; color: string; tagClass: string; leagueLogo: string; leagueName: string }> = {
+  football:   { label: 'Футбол',    emoji: '⚽', color: 'hsl(var(--sport-football))',   tagClass: 'sport-tag-football',   leagueLogo: 'https://www.thesportsdb.com/images/media/league/badge/4355.png',  leagueName: 'РПЛ' },
+  hockey:     { label: 'Хоккей',    emoji: '🏒', color: 'hsl(var(--sport-hockey))',     tagClass: 'sport-tag-hockey',     leagueLogo: 'https://www.thesportsdb.com/images/media/league/badge/4920.png',  leagueName: 'КХЛ' },
+  basketball: { label: 'Баскетбол', emoji: '🏀', color: 'hsl(var(--sport-basketball))', tagClass: 'sport-tag-basketball', leagueLogo: 'https://www.thesportsdb.com/images/media/league/badge/4476.png',  leagueName: 'Лига ВТБ' },
+  volleyball: { label: 'Волейбол',  emoji: '🏐', color: 'hsl(var(--sport-volleyball))', tagClass: 'sport-tag-volleyball', leagueLogo: 'https://www.thesportsdb.com/images/media/league/badge/4545.png',  leagueName: 'Суперлига' },
 };
 
 export const ALL_TEAMS: Team[] = [

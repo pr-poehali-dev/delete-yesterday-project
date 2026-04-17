@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Match, SPORT_CONFIG, TEAM_STATS } from '@/data/sportsData';
 import Icon from '@/components/ui/icon';
 import TeamLogo from '@/components/TeamLogo';
@@ -5,6 +6,19 @@ import TeamLogo from '@/components/TeamLogo';
 interface MatchDetailProps {
   match: Match;
   onClose: () => void;
+}
+
+function LeagueLogo({ src, fallback, name }: { src: string; fallback: string; name: string }) {
+  const [err, setErr] = useState(false);
+  if (err) return <span className="text-xl">{fallback}</span>;
+  return (
+    <img
+      src={src}
+      alt={name}
+      className="w-6 h-6 object-contain"
+      onError={() => setErr(true)}
+    />
+  );
 }
 
 export default function MatchDetail({ match, onClose }: MatchDetailProps) {
@@ -24,8 +38,9 @@ export default function MatchDetail({ match, onClose }: MatchDetailProps) {
         {/* Header */}
         <div className="glass rounded-2xl p-6 mb-4">
           <div className="flex items-center justify-between mb-5">
-            <span className={`text-sm px-3 py-1 rounded-full font-medium ${sport.tagClass}`}>
-              {sport.emoji} {match.league}
+            <span className={`inline-flex items-center gap-1.5 text-sm px-3 py-1 rounded-full font-medium ${sport.tagClass}`}>
+              <LeagueLogo src={sport.leagueLogo} fallback={sport.emoji} name={sport.leagueName} />
+              {match.league}
             </span>
             {isLive && (
               <div className="flex items-center gap-2">

@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Match, SPORT_CONFIG } from '@/data/sportsData';
 import TeamLogo from '@/components/TeamLogo';
 
@@ -5,6 +6,27 @@ interface MatchCardProps {
   match: Match;
   onClick?: () => void;
   compact?: boolean;
+}
+
+interface SportInfo { label: string; emoji: string; color: string; tagClass: string; leagueLogo: string; leagueName: string }
+
+function LeagueBadge({ sport }: { sport: SportInfo }) {
+  const [imgError, setImgError] = useState(false);
+  return (
+    <span className={`inline-flex items-center gap-1.5 text-xs px-2 py-0.5 rounded-full font-medium ${sport.tagClass}`}>
+      {!imgError ? (
+        <img
+          src={sport.leagueLogo}
+          alt={sport.leagueName}
+          className="w-3.5 h-3.5 object-contain"
+          onError={() => setImgError(true)}
+        />
+      ) : (
+        <span>{sport.emoji}</span>
+      )}
+      {sport.leagueName}
+    </span>
+  );
 }
 
 export default function MatchCard({ match, onClick, compact = false }: MatchCardProps) {
@@ -18,9 +40,7 @@ export default function MatchCard({ match, onClick, compact = false }: MatchCard
       className={`glass glass-hover rounded-xl p-4 cursor-pointer transition-all duration-200 ${isLive ? 'neon-border-green' : 'border border-border'} ${onClick ? 'hover:scale-[1.01]' : ''}`}
     >
       <div className="flex items-center justify-between mb-3">
-        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${sport.tagClass}`}>
-          {sport.emoji} {sport.label}
-        </span>
+        <LeagueBadge sport={sport} />
         <div className="flex items-center gap-2">
           {isLive && (
             <div className="flex items-center gap-1.5">
